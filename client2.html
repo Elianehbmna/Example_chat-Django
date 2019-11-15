@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta http-equiv="X-UA-Compatible" content="ie=edge" />
+    <title>Document</title>
+  </head>
+  <body>
+    <textarea id="message" placeholder="write a message"></textarea>
+    <br>
+    <button id="send">Send</button>
+
+    <ul id="messages">
+
+    </ul>
+    <script>
+
+        /*
+        WEBSOCKET URL FORMAT
+        ws:localhost:8000/chats/{convo_id}/{current_user_id}/{other_user_id}
+        */
+      let socket = new WebSocket("ws:localhost:8000/chats/1573826051630/2/1");
+
+      socket.onopen = function(e) {
+        alert("[open] Connection established");
+        alert("Sending to server");
+        // socket.send("My name is John");
+      };
+
+      socket.onmessage = function(event) {
+        var ul = document.getElementById("messages");
+        var li = document.createElement("li");
+        li.appendChild(document.createTextNode(JSON.parse(event.data).data.content));
+        ul.appendChild(li);
+        console.log(JSON.parse(event.data).content);
+        // alert(`[message] Data received from server: ${event.data}`);
+      };
+
+      socket.onclose = function(event) {
+        if (event.wasClean) {
+          alert(
+            `[close] Connection closed cleanly, code=${event.code} reason=${event.reason}`
+          );
+        } else {
+          // e.g. server process killed or network down
+          // event.code is usually 1006 in this case
+          alert("[close] Connection died");
+        }
+      };
+
+      socket.onerror = function(error) {
+        alert(`[error] ${error.message}`);
+      };
+
+      document.getElementById("send").addEventListener("click", function() {
+            var inputVal = document.getElementById("message").value;
+            var message_data = {
+                message: inputVal,
+                sender: 1
+            };
+
+            socket.send(JSON.stringify(message_data));
+        });
+    </script>
+  </body>
+</html>
